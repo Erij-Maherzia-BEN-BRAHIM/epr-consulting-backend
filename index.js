@@ -26,15 +26,25 @@ const transporter = nodemailer.createTransport({
 app.post('/api/contact', async (req, res) => {
   const { name, email, phone, company, subject, message, trainingTab, trainingOption } = req.body;
 
+  // Log received data
+  console.log('Received contact form submission:', { name, email, phone, subject });
+
   // Validate required fields
   if (!name || !email || !phone || !subject || !message) {
+    console.error('Validation failed:', { name, email, phone, subject, message });
     return res.status(400).json({ error: 'All required fields must be filled' });
+  }
+
+  // Verify SMTP configuration
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+    console.error('SMTP credentials not configured');
+    return res.status(500).json({ error: 'Email service not configured' });
   }
 
   // Email content
   const mailOptions = {
-    from: process.env.EMAIL_USER, // Must be your authenticated email
-    to: process.env.EMAIL_USER, // Your desired email address (info@epraccess.com)
+    from: process.env.EMAIL_USER,
+    to: process.env.EMAIL_USER,
     subject: `New Contact Form Submission: ${subject}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -50,8 +60,8 @@ app.post('/api/contact', async (req, res) => {
 
         <div style="background-color: #eff6ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <h3 style="color: #1f2937; margin-top: 0;">Training Interest</h3>
-          <p><strong>Category:</strong> ${trainingTab}</p>
-          <p><strong>Training:</strong> ${trainingOption}</p>
+          <p><strong>Category:</strong> ${trainingTab || 'Not specified'}</p>
+          <p><strong>Training:</strong> ${trainingOption || 'Not specified'}</p>
         </div>
 
         <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
@@ -71,17 +81,21 @@ app.post('/api/contact', async (req, res) => {
         </p>
       </div>
     `,
-    replyTo: email, // Allow easy reply to the sender
+    replyTo: email,
   };
 
   try {
-    // Send email
+    console.log('Attempting to send email...');
     await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully to info@epraccess.com');
+    console.log('Email sent successfully to:', process.env.EMAIL_USER);
     res.status(200).json({ message: 'Email sent successfully' });
   } catch (error) {
-    console.error('Error sending email:', error);
-    res.status(500).json({ error: 'Failed to send email' });
+    console.error('Error sending email:', error.message);
+    console.error('Error details:', error);
+    res.status(500).json({ 
+      error: 'Failed to send email',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 

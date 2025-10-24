@@ -49,7 +49,7 @@ app.post('/api/contact', async (req, res) => {
 
   // Email content
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: email,
     to: EPR_CONSULTING_RECEIVER_EMAIL,
     subject: `New Contact Form Submission: ${subject}`,
     html: `
@@ -133,7 +133,7 @@ app.post('/api/schedule-demo', async (req, res) => {
 
   // Email content for demo request
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: email,
     to: EPR_ACCESS_RECEIVER_EMAIL,
     subject: `New EPR Demo Request from ${firstName} ${lastName}`,
     html: `
@@ -212,7 +212,7 @@ app.post('/api/contact-us', async (req, res) => {
 
   // Email content for contact inquiry
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: email,
     to: EPR_ACCESS_RECEIVER_EMAIL,
     subject: `New EPR Contact Inquiry: ${inquiryType || 'General'} - ${firstName} ${lastName}`,
     html: `

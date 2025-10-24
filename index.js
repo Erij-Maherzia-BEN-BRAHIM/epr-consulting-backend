@@ -12,6 +12,10 @@ app.use(express.json());
 
 // Email configuration
 const smtpPort = parseInt(process.env.SMTP_PORT) || 587;
+
+const EPR_ACCESS_RECEIVER_EMAIL = process.env.EMAIL_USER || 'info@epraccess.com';
+const EPR_CONSULTING_RECEIVER_EMAIL = process.env.EPR_CONSULTING_RECEIVER_EMAIL || 'info@epr-consulting.com';
+
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
   port: smtpPort,
@@ -46,7 +50,7 @@ app.post('/api/contact', async (req, res) => {
   // Email content
   const mailOptions = {
     from: process.env.EMAIL_USER,
-    to: process.env.EMAIL_USER,
+    to: EPR_CONSULTING_RECEIVER_EMAIL,
     subject: `New Contact Form Submission: ${subject}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -89,7 +93,7 @@ app.post('/api/contact', async (req, res) => {
   try {
     console.log('Attempting to send email...');
     await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully to:', process.env.EMAIL_USER);
+    console.log('Email sent successfully to:', EPR_CONSULTING_RECEIVER_EMAIL);
     res.status(200).json({ message: 'Email sent successfully' });
   } catch (error) {
     console.error('Error sending email:', error.message);
@@ -130,7 +134,7 @@ app.post('/api/schedule-demo', async (req, res) => {
   // Email content for demo request
   const mailOptions = {
     from: process.env.EMAIL_USER,
-    to: process.env.EMAIL_USER,
+    to: EPR_ACCESS_RECEIVER_EMAIL,
     subject: `New EPR Demo Request from ${firstName} ${lastName}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -209,7 +213,7 @@ app.post('/api/contact-us', async (req, res) => {
   // Email content for contact inquiry
   const mailOptions = {
     from: process.env.EMAIL_USER,
-    to: process.env.EMAIL_USER,
+    to: EPR_ACCESS_RECEIVER_EMAIL,
     subject: `New EPR Contact Inquiry: ${inquiryType || 'General'} - ${firstName} ${lastName}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">

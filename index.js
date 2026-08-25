@@ -49,7 +49,7 @@ app.post('/api/contact', async (req, res) => {
 
   // Email content
   const mailOptions = {
-    from: email,
+    from: process.env.EMAIL_USER,
     to: EPR_CONSULTING_RECEIVER_EMAIL,
     subject: `New Contact Form Submission: ${subject}`,
     html: `
@@ -125,15 +125,20 @@ app.post('/api/schedule-demo', async (req, res) => {
 
   console.log('Received EPR demo request:', { firstName, lastName, email, company });
 
-  // Validate required fields
-  if (!firstName || !lastName || !email || !company || !phone || !preferredDate || !preferredTime) {
+  // Validate required fields (phone is optional — matches frontend form)
+  if (!firstName || !lastName || !email || !company || !preferredDate || !preferredTime) {
     console.error('EPR Demo validation failed');
     return res.status(400).json({ error: 'All required fields must be filled' });
   }
 
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+    console.error('SMTP credentials not configured for EPR demo request');
+    return res.status(500).json({ error: 'Email service not configured' });
+  }
+
   // Email content for demo request
   const mailOptions = {
-    from: email,
+    from: process.env.EMAIL_USER,
     to: EPR_ACCESS_RECEIVER_EMAIL,
     subject: `New EPR Demo Request from ${firstName} ${lastName}`,
     html: `
@@ -147,7 +152,7 @@ app.post('/api/schedule-demo', async (req, res) => {
             <h3 style="color: #059669; margin-top: 0;">Contact Information</h3>
             <p><strong>Name:</strong> ${firstName} ${lastName}</p>
             <p><strong>Email:</strong> <a href="mailto:${email}" style="color: #10b981;">${email}</a></p>
-            <p><strong>Phone:</strong> ${phone}</p>
+            <p><strong>Phone:</strong> ${phone || 'Not provided'}</p>
             <p><strong>Company:</strong> ${company}</p>
             ${country ? `<p><strong>Country:</strong> ${country}</p>` : ''}
           </div>
@@ -210,9 +215,14 @@ app.post('/api/contact-us', async (req, res) => {
     return res.status(400).json({ error: 'All required fields must be filled' });
   }
 
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+    console.error('SMTP credentials not configured for EPR contact inquiry');
+    return res.status(500).json({ error: 'Email service not configured' });
+  }
+
   // Email content for contact inquiry
   const mailOptions = {
-    from: email,
+    from: process.env.EMAIL_USER,
     to: EPR_ACCESS_RECEIVER_EMAIL,
     subject: `New EPR Contact Inquiry: ${inquiryType || 'General'} - ${firstName} ${lastName}`,
     html: `
